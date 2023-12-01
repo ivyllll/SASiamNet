@@ -307,7 +307,7 @@ class MFAM(nn.Module):
         mul4 = self.conv_multi(add4 * dm4)
         mul3 = self.conv_multi(add3 * dm3)
         mul2 = self.conv_multi(add2 * dm2)
-        # mul5 = F.interpolate(mul5, mul2.size()[2:], mode='bilinear', align_corners=True)  # 插值法进行上采样,改变特征图size,使它们大小相同
+        # mul5 = F.interpolate(mul5, mul2.size()[2:], mode='bilinear', align_corners=True)  
         # mul4 = F.interpolate(mul4, mul2.size()[2:], mode='bilinear', align_corners=True)
         # mul3 = F.interpolate(mul3, mul2.size()[2:], mode='bilinear', align_corners=True)
         # cat = self.conv_concatenate(torch.cat([mul2, mul3, mul4, mul5], dim = 1))
@@ -355,7 +355,7 @@ class CIEM(nn.Module):
         )
         self.pools_sizes = [2, 4, 8]
         self.conv_pool1 = nn.Sequential(
-            nn.AvgPool2d(kernel_size=self.pools_sizes[0], stride=self.pools_sizes[0]), # kernel_size:池化窗口大小 stride:池化窗口移动步长
+            nn.AvgPool2d(kernel_size=self.pools_sizes[0], stride=self.pools_sizes[0]), 
             nn.Conv2d(self.in_d, self.in_d, kernel_size=3, stride=1, padding=1, bias=False),
             nn.BatchNorm2d(self.in_d),
             nn.ReLU(inplace=True),
@@ -385,7 +385,7 @@ class CIEM(nn.Module):
         )
     def forward(self, r5, r4, r3, r2, r5_, r4_, r3_, r2_):
         # upsampling
-        r5 = F.interpolate(r5, r2.size()[2:], mode='bilinear', align_corners=True)  # 插值法进行上采样,改变特征图size,使它们大小相同
+        r5 = F.interpolate(r5, r2.size()[2:], mode='bilinear', align_corners=True)  
         r4 = F.interpolate(r4, r2.size()[2:], mode='bilinear', align_corners=True)
         r3 = F.interpolate(r3, r2.size()[2:], mode='bilinear', align_corners=True)
         r2 = r2
@@ -396,7 +396,6 @@ class CIEM(nn.Module):
         x = self.conv_dr(x_eca)
 
         # pooling
-        # 使用自适应平均池化来进行特征复原  池化操作是为了在降低像素的同时保存重要信息
         d2 = x
         d3 = self.conv_pool1(x)
         d4 = self.conv_pool2(x)
@@ -470,19 +469,19 @@ class Decoder(nn.Module):
 
     def forward(self, d5, d4, d3, d2):
 
-        d5 = F.interpolate(d5, d4.size()[2:], mode='bilinear', align_corners=True)  # 要把d5的HW变成和d4一样大小才能conv_sum(也就是fusion)
+        d5 = F.interpolate(d5, d4.size()[2:], mode='bilinear', align_corners=True)  
         d5 = self.eca(d5)
         # d5 = self.ca(d5)
         # d5 = d5 * self.ca(d5)
         d4 = self.conv_sum1(d4 + d5)
 
-        d4 = F.interpolate(d4, d3.size()[2:], mode='bilinear', align_corners=True)  # 要把d4的HW变成和d3一样大小才能conv_sum(也就是fusion)
+        d4 = F.interpolate(d4, d3.size()[2:], mode='bilinear', align_corners=True)  
         d4 = self.eca(d4)
         # d4 = self.ca(d4)
         # d4 = d4 * self.ca(d4)
         d3 = self.conv_sum2(d3 + d4)
 
-        d3 = F.interpolate(d3, d2.size()[2:], mode='bilinear', align_corners=True)  # 要把d3的HW变成和d2一样大小才能conv_sum(也就是fusion)
+        d3 = F.interpolate(d3, d2.size()[2:], mode='bilinear', align_corners=True)  
         d3 = self.eca(d3)
         # d3 = self.ca(d3)
         # d3 = d3 * self.ca(d3)
@@ -612,7 +611,7 @@ if __name__ == "__main__":
     # y = torch.randn(10, 64, 64, 64)
     # z = torch.randn(10, 64, 32, 32)
     # w = torch.randn(10, 64, 16, 16)
-    # net1 = ChangeInformationExtractionModule(64, 2) # 其实第二个参数不起任何作用，不管怎么变，输出的通道数都是第一个参数（输入通道数）
+    # net1 = ChangeInformationExtractionModule(64, 2) 
     # d5, d4, d3, d2 = net1(x, y, z, w)
     # # torch.Size([1, 4, 2, 2]) torch.Size([1, 4, 4, 4]) torch.Size([1, 4, 8, 8]) torch.Size([1, 4, 16, 16])
     # # torch.Size([10, 64, 2, 2]) torch.Size([10, 64, 4, 4]) torch.Size([10, 64, 8, 8]) torch.Size([10, 64, 16, 16])
@@ -639,7 +638,7 @@ if __name__ == "__main__":
     # d2 = torch.randn(1, 64, 16, 16)
     # net1 = Decoder(64,2)
     # decoder = net1(d5, d4, d3, d2)
-    # print(decoder.shape) # torch.Size([1, 2, 16, 16]) decoder就是上采样还原图片尺寸的过程 d2的HW就是原尺寸而且不一定是相关倍数（4/8/16/32）
+    # print(decoder.shape) # torch.Size([1, 2, 16, 16]) 
 
     # Base
     x = torch.randn(1, 3, 512, 512)
